@@ -2,19 +2,74 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: meal-planner-postgres
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: meal_planner
-      POSTGRES_USER: meal
-      POSTGRES_PASSWORD: meal
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: ${POSTGRES_DB:-meal_planner}
+      POSTGRES_USER: ${POSTGRES_USER:-meal}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-meal}
     volumes:
       - meal_planner_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U meal -d meal_planner"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-meal} -d ${POSTGRES_DB:-meal_planner}",
+        ]
       interval: 5s
       timeout: 5s
       retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    container_name: meal-planner-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-meal}:${POSTGRES_PASSWORD:-meal}@postgres:5432/${POSTGRES_DB:-meal_planner}
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:8080}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@example.com}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-admin123}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - "8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
+    container_name: meal-planner-frontend
+    restart: unless-stopped
+    expose:
+      - "80"
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: meal-planner-nginx
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+    ports:
+      - "127.0.0.1:${APP_PORT:-8080}:80"
+    volumes:
+      - ./deploy/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
 
 volumes:
   meal_planner_pgdata:
