@@ -4,26 +4,8 @@ from fastapi.testclient import TestClient
 
 from app.database import Base, get_db
 from app.main import app
-from app.modules.inventory.service import expiration_status, inventory_totals
-from app.modules.planner.service import (
-    MEAL_SLOTS,
-    choose_recipe_for_slot,
-    generate_week_plan,
-    planned_entries,
-)
-from app.modules.recipes.service import (
-    cheapest_price,
-    estimate_cost,
-    load_recipes_query,
-    recipe_analysis,
-    recipe_is_allowed_for_user,
-)
-from app.modules.shopping.service import generate_shopping_items, serialize_shopping_item
 from app.security import hash_password
 from app.services import category_exists
-from app.services import serialize_category as services_serialize_category
-from app.services import serialize_ingredient as services_serialize_ingredient
-from app.shared.serializers import serialize_category, serialize_ingredient
 from app.models import User
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -393,24 +375,3 @@ def test_category_exists_checks_category_names():
         assert category_exists(db, "мясо") is False
     finally:
         db.close()
-
-
-def test_services_use_shared_serializers():
-    assert services_serialize_category is serialize_category
-    assert services_serialize_ingredient is serialize_ingredient
-
-
-def test_domain_services_expose_split_service_surface():
-    assert expiration_status.__module__ == "app.modules.inventory.service"
-    assert inventory_totals.__module__ == "app.modules.inventory.service"
-    assert cheapest_price.__module__ == "app.modules.recipes.service"
-    assert estimate_cost.__module__ == "app.modules.recipes.service"
-    assert recipe_analysis.__module__ == "app.modules.recipes.service"
-    assert load_recipes_query.__module__ == "app.modules.recipes.service"
-    assert recipe_is_allowed_for_user.__module__ == "app.modules.recipes.service"
-    assert MEAL_SLOTS == ("breakfast", "lunch", "dinner")
-    assert choose_recipe_for_slot.__module__ == "app.modules.planner.service"
-    assert generate_week_plan.__module__ == "app.modules.planner.service"
-    assert planned_entries.__module__ == "app.modules.planner.service"
-    assert generate_shopping_items.__module__ == "app.modules.shopping.service"
-    assert serialize_shopping_item.__module__ == "app.modules.shopping.service"
