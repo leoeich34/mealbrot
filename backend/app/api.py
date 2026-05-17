@@ -52,6 +52,7 @@ from app.security import (
     set_auth_cookie,
     verify_password,
 )
+from app.shared.crud import commit_refresh, get_or_404
 from app.services import (
     expiration_status,
     generate_shopping_items,
@@ -64,20 +65,6 @@ from app.services import (
 
 
 router = APIRouter()
-
-
-def get_or_404(db: Session, model, object_id: int):
-    item = db.get(model, object_id)
-    if not item:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    return item
-
-
-def commit_refresh(db: Session, item):
-    db.add(item)
-    db.commit()
-    db.refresh(item)
-    return item
 
 
 @router.post("/auth/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
