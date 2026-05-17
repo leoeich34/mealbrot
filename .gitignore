@@ -16,3 +16,4 @@ backend/test.db
 backend/dev.db
 backend/.pytest_cache/
 frontend/.vite/
+.worktrees/
