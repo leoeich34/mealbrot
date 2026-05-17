@@ -59,6 +59,66 @@ def login(api, email, password):
     return response
 
 
+def test_app_registers_expected_routes():
+    route_contracts = {
+        (route.path, method)
+        for route in app.routes
+        for method in route.methods
+        if method not in {"HEAD", "OPTIONS"}
+    }
+
+    assert route_contracts == {
+        ("/openapi.json", "GET"),
+        ("/docs", "GET"),
+        ("/docs/oauth2-redirect", "GET"),
+        ("/redoc", "GET"),
+        ("/auth/register", "POST"),
+        ("/auth/login", "POST"),
+        ("/auth/logout", "POST"),
+        ("/auth/me", "GET"),
+        ("/admin/users", "GET"),
+        ("/admin/users/{user_id}/role", "PATCH"),
+        ("/admin/categories", "GET"),
+        ("/admin/categories", "POST"),
+        ("/admin/categories/{category_id}", "PUT"),
+        ("/admin/categories/{category_id}", "DELETE"),
+        ("/admin/ingredients", "GET"),
+        ("/admin/ingredients", "POST"),
+        ("/admin/ingredients/{ingredient_id}", "PUT"),
+        ("/admin/ingredients/{ingredient_id}", "DELETE"),
+        ("/admin/stores", "GET"),
+        ("/admin/stores", "POST"),
+        ("/admin/stores/{store_id}", "PUT"),
+        ("/admin/stores/{store_id}", "DELETE"),
+        ("/admin/prices", "GET"),
+        ("/admin/prices", "POST"),
+        ("/admin/prices/{price_id}", "PUT"),
+        ("/admin/prices/{price_id}", "DELETE"),
+        ("/admin/recipes", "GET"),
+        ("/admin/recipes", "POST"),
+        ("/admin/recipes/{recipe_id}", "PUT"),
+        ("/admin/recipes/{recipe_id}", "DELETE"),
+        ("/catalog/categories", "GET"),
+        ("/catalog/ingredients", "GET"),
+        ("/catalog/stores", "GET"),
+        ("/inventory", "GET"),
+        ("/inventory", "POST"),
+        ("/inventory/{item_id}", "PUT"),
+        ("/inventory/{item_id}", "DELETE"),
+        ("/recipes", "GET"),
+        ("/planner/generate-week", "POST"),
+        ("/planner/month/{year}/{month}", "GET"),
+        ("/planner/day/{planned_date}", "GET"),
+        ("/planner/day/{planned_date}", "PUT"),
+        ("/shopping-list", "GET"),
+        ("/shopping-list", "POST"),
+        ("/shopping-list/generate", "POST"),
+        ("/shopping-list/{item_id}", "PATCH"),
+        ("/shopping-list/{item_id}", "DELETE"),
+        ("/health", "GET"),
+    }
+
+
 def create_user(api):
     response = api.post(
         "/auth/register",
