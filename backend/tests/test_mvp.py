@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from app.database import Base, get_db
 from app.main import app
 from app.security import hash_password
+from app.services import category_exists
 from app.models import User
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -289,3 +290,28 @@ def test_shopping_list_combines_missing_ingredients_by_category_and_manual_items
     checked = api.patch(f"/shopping-list/{manual.json()['id']}", json={"is_purchased": True})
     assert checked.status_code == 200
     assert checked.json()["is_purchased"] is True
+
+
+def test_shopping_list_rejects_unknown_ingredient_ids():
+    api = client()
+    create_user(api)
+
+    response = api.post(
+        "/shopping-list",
+        json={"title": "неизвестный товар", "quantity": 1, "unit": "pcs", "ingredient_id": 999},
+    )
+
+    assert response.status_code == 404
+
+
+def test_category_exists_checks_category_names():
+    api = client()
+    login(api, "admin@example.com", "admin123")
+    api.post("/admin/categories", json={"name": "овощи"})
+
+    db = TestingSessionLocal()
+    try:
+        assert category_exists(db, "овощи") is True
+        assert category_exists(db, "мясо") is False
+    finally:
+        db.close()

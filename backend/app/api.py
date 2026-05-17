@@ -615,7 +615,11 @@ def create_shopping_item(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    ingredient = db.get(Ingredient, payload.ingredient_id) if payload.ingredient_id else None
+    ingredient = (
+        get_or_404(db, Ingredient, payload.ingredient_id)
+        if payload.ingredient_id is not None
+        else None
+    )
     item = ShoppingListItem(
         user_id=user.id,
         ingredient_id=ingredient.id if ingredient else None,

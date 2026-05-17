@@ -5,6 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.models import (
+    Category,
     Ingredient,
     InventoryItem,
     MealPlanEntry,
@@ -275,6 +276,6 @@ def serialize_shopping_item(item: ShoppingListItem) -> dict:
 
 def category_exists(db: Session, name: str) -> bool:
     return (
-        db.scalar(select(func.count()).select_from(Ingredient).join(Ingredient.category).where(Ingredient.name == name))
+        db.scalar(select(func.count()).select_from(Category).where(Category.name == name))
         or 0
     ) > 0
