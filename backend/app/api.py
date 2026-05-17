@@ -53,15 +53,10 @@ from app.security import (
     verify_password,
 )
 from app.shared.crud import commit_refresh, get_or_404
-from app.services import (
-    expiration_status,
-    generate_shopping_items,
-    generate_week_plan,
-    load_recipes_query,
-    planned_entries,
-    recipe_analysis,
-    serialize_shopping_item,
-)
+from app.modules.inventory.service import expiration_status
+from app.modules.planner.service import generate_week_plan, planned_entries
+from app.modules.recipes.service import load_recipes_query, recipe_analysis
+from app.modules.shopping.service import generate_shopping_items, serialize_shopping_item
 
 
 router = APIRouter()
