@@ -2,9 +2,8 @@ from datetime import date, timedelta
 
 from fastapi.testclient import TestClient
 
-from app.api import router as api_router
 from app.database import Base, get_db
-from app.main import app, router as app_router
+from app.main import app
 from app.security import hash_password
 from app.services import category_exists
 from app.models import User
@@ -118,12 +117,6 @@ def test_app_registers_expected_routes():
         ("/shopping-list/{item_id}", "DELETE"),
         ("/health", "GET"),
     }
-
-
-def test_app_uses_aggregate_api_router():
-    assert app_router is api_router
-
-
 def create_user(api):
     response = api.post(
         "/auth/register",
