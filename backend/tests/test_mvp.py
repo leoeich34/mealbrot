@@ -6,6 +6,9 @@ from app.database import Base, get_db
 from app.main import app
 from app.security import hash_password
 from app.services import category_exists
+from app.services import serialize_category as services_serialize_category
+from app.services import serialize_ingredient as services_serialize_ingredient
+from app.shared.serializers import serialize_category, serialize_ingredient
 from app.models import User
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -375,3 +378,8 @@ def test_category_exists_checks_category_names():
         assert category_exists(db, "мясо") is False
     finally:
         db.close()
+
+
+def test_services_use_shared_serializers():
+    assert services_serialize_category is serialize_category
+    assert services_serialize_ingredient is serialize_ingredient

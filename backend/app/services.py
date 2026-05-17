@@ -15,6 +15,7 @@ from app.models import (
     ShoppingListItem,
     User,
 )
+from app.shared.serializers import serialize_category, serialize_ingredient
 
 
 MEAL_SLOTS = ("breakfast", "lunch", "dinner")
@@ -58,19 +59,6 @@ def estimate_cost(db: Session, ingredient: Ingredient, quantity: float) -> float
     if ingredient.unit in {"g", "ml"}:
         return round((quantity / 1000) * price.price_per_unit, 2)
     return round(quantity * price.price_per_unit, 2)
-
-
-def serialize_category(category):
-    return {"id": category.id, "name": category.name, "is_active": category.is_active}
-
-
-def serialize_ingredient(ingredient: Ingredient) -> dict:
-    return {
-        "id": ingredient.id,
-        "name": ingredient.name,
-        "unit": ingredient.unit,
-        "category": serialize_category(ingredient.category),
-    }
 
 
 def recipe_analysis(db: Session, recipe: Recipe, user: User | None = None) -> dict:
