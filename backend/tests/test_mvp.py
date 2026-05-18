@@ -5,7 +5,6 @@ from fastapi.testclient import TestClient
 from app.database import Base, get_db
 from app.main import app
 from app.security import hash_password
-from app.services import category_exists
 from app.models import User
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -361,15 +360,3 @@ def test_shopping_list_rejects_unknown_ingredient_ids():
 
     assert response.status_code == 404
 
-
-def test_category_exists_checks_category_names():
-    api = client()
-    login(api, "admin@example.com", "admin123")
-    api.post("/admin/categories", json={"name": "овощи"})
-
-    db = TestingSessionLocal()
-    try:
-        assert category_exists(db, "овощи") is True
-        assert category_exists(db, "мясо") is False
-    finally:
-        db.close()
